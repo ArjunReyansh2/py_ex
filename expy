@@ -20,3 +20,57 @@ raw_valid_data = Wifi_validation.copy()
 Wifi_train.describe()
 
 corr = Wifi_train.iloc[:,520:529].corr()
+
+fig, ax = plt.subplots(1, 1, figsize = (16, 6))
+
+ax = sns.heatmap(
+    corr, 
+    vmin=-1, vmax=1, center=0,
+    cmap=sns.diverging_palette(20, 220, n=200),
+    square=True
+)
+ax.set_xticklabels(
+    ax.get_xticklabels(),
+    rotation=45,
+    horizontalalignment='right'
+);
+
+fig, ax = plt.subplots(1, 1, figsize = (12, 6))
+
+sns.scatterplot(Wifi_train['LONGITUDE'],Wifi_train['LATITUDE'],hue=Wifi_train['BUILDINGID'],palette='Dark2_r')
+
+
+fig, ax = plt.subplots(1, 1, figsize = (12, 6))
+
+sns.scatterplot(Wifi_train['LONGITUDE'],Wifi_train['LATITUDE'],hue=Wifi_train['FLOOR'])
+
+Wifi_train['TIMESTAMP'] = Wifi_train['TIMESTAMP'].apply(datetime.fromtimestamp)
+Wifi_validation['TIMESTAMP'] = Wifi_validation['TIMESTAMP'].apply(datetime.fromtimestamp)
+
+
+Wifi_train = Wifi_train.sort_values('TIMESTAMP')
+Wifi_validation = Wifi_validation.sort_values('TIMESTAMP')
+
+WAP_columns = list(Wifi_train.columns[0:529])
+
+Wifi_train.drop_duplicates(subset= WAP_columns, keep='first',inplace=True)
+Wifi_validation.drop_duplicates(subset= WAP_columns, keep='first',inplace=True)
+
+print(Wifi_train.shape)
+print(Wifi_validation.shape)
+
+#all WAP's in a separated Data Frame
+WAPs = Wifi_train.iloc[:,:520]
+WAPs2 = Wifi_validation.iloc[:,:520]
+
+WAPs_trans = WAPs.transpose()
+
+from itertools import chain
+
+fig, ax = plt.subplots(1, 1, figsize = (10, 5))
+
+plt.scatter( list(chain.from_iterable( [WAPs_trans.index.values.tolist()]*19300)), WAPs_trans,color = 'darkgrey',alpha=0.5)
+
+plt.plot([0,520],[-25,-25],'k-', lw=5, color='red')
+
+plt.xticks(list(range(0,520,20)), rotation='vertical')
